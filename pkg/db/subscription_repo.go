@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -62,13 +63,38 @@ func (r *SubscriptionRepo) Read(id int) (*models.Subscription, error) {
 	return &subscription, nil
 }
 
-var updateSubsription = `
-UPDATE subsriptions 
-SET service_name = :service_name, price = :price, user_id = :user_id, start_date = :start_date, end_date = :end_date 
-WHERE id = :id`
+// var updateSubsription = `
+// UPDATE subsriptions
+// SET service_name = :service_name, price = :price, user_id = :user_id, start_date = :start_date, end_date = :end_date
+// WHERE id = :id`
 
 func (r *SubscriptionRepo) Update(subscription *models.Subscription) error {
-	res, err := r.db.NamedExec(updateSubsription, subscription)
+	fields := []string{}
+	if subscription.UserId != "" {
+		fields = append(fields, "user_id = :user_id")
+	}
+	if subscription.ServiceName != "" {
+		fields = append(fields, "service_name = :service_name")
+	}
+	if subscription.Price != 0 {
+		fields = append(fields, "price = :price")
+	}
+	if !subscription.StartDate.IsZero() {
+		fields = append(fields, "start_date = :start_date")
+	}
+	if subscription.EndDateFormated == "0" {
+		fields = append(fields, "end_date = NULL")
+	} else if subscription.EndDate != nil && !subscription.EndDate.IsZero() {
+		fields = append(fields, "end_date = :end_date")
+	}
+
+	// if len(fields) == 0 {
+	// 	return err
+	// }
+	query := fmt.Sprintf("UPDATE subsriptions SET %s WHERE id = :id", strings.Join(fields, ", "))
+	r.log.Debug("Update query", slog.String("string", query))
+
+	res, err := r.db.NamedExec(query, subscription)
 	if err != nil {
 		r.log.Error("Error while updating entity",
 			slog.String("err", err.Error()),
@@ -141,9 +167,13 @@ func (r *SubscriptionRepo) List(filter *models.Subscription) ([]*models.Subscrip
 		if len(conditions) > 0 {
 			query += " WHERE " + strings.Join(conditions, " AND ")
 		}
+	} else {
+		filter = &models.Subscription{}
 	}
+	r.log.Debug("Select query", slog.String("string", query))
 
-	query, args, err := sqlx.Named(query, filter)
+	query, args, err := sqlx.BindNamed(sqlx.DOLLAR, query, filter)
+	r.log.Debug("Prepared query", slog.String("string", query), slog.Any("args", args))
 	if err != nil {
 		r.log.Error("Error while preparing quary",
 			slog.String("err", err.Error()),

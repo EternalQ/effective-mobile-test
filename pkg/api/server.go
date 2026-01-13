@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/EternalQ/effective-mobile-test/pkg/db"
 	"github.com/EternalQ/effective-mobile-test/pkg/models"
 	"github.com/EternalQ/effective-mobile-test/pkg/service"
 	"github.com/gorilla/mux"
@@ -102,7 +103,11 @@ func (s *Server) readSubsription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sub, err := s.subsServ.Read(id)
-	if err != nil {
+	if err == db.ErrNotFound {
+		s.handleError(w, r, err.Error(), http.StatusNotFound)
+		return
+	} else if err != nil {
+		s.handleError(w, r, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -131,6 +136,15 @@ func (s *Server) updateSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if sub.UserId == "" &&
+		sub.ServiceName == "" &&
+		sub.Price == 0 &&
+		sub.StartDateFormated == "" &&
+		sub.EndDateFormated == "" {
+		s.handleError(w, r, "Empty fields", http.StatusBadRequest)
+		return
+	}
+
 	if err := sub.Parse(); err != nil {
 		s.log.Error("Error while parsing subscription",
 			slog.String("err", err.Error()),
@@ -141,7 +155,11 @@ func (s *Server) updateSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sub.Id = id
-	if err := s.subsServ.Update(sub); err != nil {
+	err = s.subsServ.Update(sub)
+	if err == db.ErrNotFound {
+		s.handleError(w, r, err.Error(), http.StatusNotFound)
+		return
+	} else if err != nil {
 		s.handleError(w, r, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -162,7 +180,11 @@ func (s *Server) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.subsServ.Delete(id); err != nil {
+	err = s.subsServ.Delete(id)
+	if err == db.ErrNotFound {
+		s.handleError(w, r, err.Error(), http.StatusNotFound)
+		return
+	} else if err != nil {
 		s.handleError(w, r, err.Error(), http.StatusInternalServerError)
 		return
 	}
