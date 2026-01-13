@@ -1,12 +1,16 @@
 package db
 
 import (
+	"database/sql"
+	"errors"
 	"log/slog"
 	"strings"
 
 	"github.com/EternalQ/effective-mobile-test/pkg/models"
 	"github.com/jmoiron/sqlx"
 )
+
+var ErrNotFound = errors.New("entity not found")
 
 type SubscriptionRepo struct {
 	db  *sqlx.DB
@@ -46,7 +50,9 @@ WHERE id = $1`
 func (r *SubscriptionRepo) Read(id int) (*models.Subscription, error) {
 	var subscription models.Subscription
 	err := r.db.Get(&subscription, readSubscription, id)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return nil, ErrNotFound
+	} else if err != nil {
 		r.log.Error("Error while getting entity",
 			slog.String("err", err.Error()),
 			slog.String("method", "Read"),
@@ -58,24 +64,27 @@ func (r *SubscriptionRepo) Read(id int) (*models.Subscription, error) {
 
 var updateSubsription = `
 UPDATE subsriptions 
-SET service_name = $1, price = $2, user_id = $3, start_date = $4, end_date = $5 
-WHERE id = $6`
+SET service_name = :service_name, price = :price, user_id = :user_id, start_date = :start_date, end_date = :end_date 
+WHERE id = :id`
 
 func (r *SubscriptionRepo) Update(subscription *models.Subscription) error {
-	_, err := r.db.Exec(updateSubsription,
-		subscription.ServiceName,
-		subscription.Price,
-		subscription.UserId,
-		subscription.StartDate,
-		subscription.EndDate, subscription.Id)
-
+	res, err := r.db.NamedExec(updateSubsription, subscription)
 	if err != nil {
 		r.log.Error("Error while updating entity",
 			slog.String("err", err.Error()),
-			slog.String("method", "update"),
+			slog.String("method", "Update"),
 		)
 		return err
 	}
+
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		r.log.Debug("Nothing updated",
+			slog.String("method", "Update"),
+		)
+		return ErrNotFound
+	}
+
 	return nil
 }
 
@@ -84,7 +93,7 @@ DELETE FROM subsriptions
 WHERE id = $1`
 
 func (r *SubscriptionRepo) Delete(id int) error {
-	_, err := r.db.Exec(deleteSubscription, id)
+	res, err := r.db.Exec(deleteSubscription, id)
 	if err != nil {
 		r.log.Error("Error while creating entity",
 			slog.String("err", err.Error()),
@@ -92,6 +101,15 @@ func (r *SubscriptionRepo) Delete(id int) error {
 		)
 		return err
 	}
+
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		r.log.Debug("Nothing deleted",
+			slog.String("method", "Delete"),
+		)
+		return ErrNotFound
+	}
+
 	return nil
 }
 
