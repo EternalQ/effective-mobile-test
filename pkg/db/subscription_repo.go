@@ -14,7 +14,10 @@ type SubscriptionRepo struct {
 }
 
 func NewSubscriptionRepo(db *sqlx.DB, log *slog.Logger) *SubscriptionRepo {
-	return &SubscriptionRepo{db, log}
+	return &SubscriptionRepo{
+		db,
+		log.With(slog.String("where", "db/SubscriptionRepo")),
+	}
 }
 
 var createSubscription = `
@@ -25,6 +28,10 @@ RETURNING *;`
 func (r *SubscriptionRepo) Create(s *models.Subscription) error {
 	err := r.db.Get(s, createSubscription, s.ServiceName, s.Price, s.UserId, s.StartDate, s.EndDate)
 	if err != nil {
+		r.log.Error("Error while creating entity",
+			slog.String("err", err.Error()),
+			slog.String("method", "Create"),
+		)
 		return err
 	}
 
@@ -40,6 +47,10 @@ func (r *SubscriptionRepo) Read(id int) (*models.Subscription, error) {
 	var subscription models.Subscription
 	err := r.db.Get(&subscription, readSubscription, id)
 	if err != nil {
+		r.log.Error("Error while getting entity",
+			slog.String("err", err.Error()),
+			slog.String("method", "Read"),
+		)
 		return nil, err
 	}
 	return &subscription, nil
@@ -59,6 +70,10 @@ func (r *SubscriptionRepo) Update(subscription *models.Subscription) error {
 		subscription.EndDate, subscription.Id)
 
 	if err != nil {
+		r.log.Error("Error while updating entity",
+			slog.String("err", err.Error()),
+			slog.String("method", "update"),
+		)
 		return err
 	}
 	return nil
@@ -71,6 +86,10 @@ WHERE id = $1`
 func (r *SubscriptionRepo) Delete(id int) error {
 	_, err := r.db.Exec(deleteSubscription, id)
 	if err != nil {
+		r.log.Error("Error while creating entity",
+			slog.String("err", err.Error()),
+			slog.String("method", "Delete"),
+		)
 		return err
 	}
 	return nil
@@ -108,10 +127,18 @@ func (r *SubscriptionRepo) List(filter *models.Subscription) ([]*models.Subscrip
 
 	query, args, err := sqlx.Named(query, filter)
 	if err != nil {
+		r.log.Error("Error while preparing quary",
+			slog.String("err", err.Error()),
+			slog.String("method", "List"),
+		)
 		return nil, err
 	}
 	err = r.db.Select(&subscriptions, query, args...)
 	if err != nil {
+		r.log.Error("Error while listing entity",
+			slog.String("err", err.Error()),
+			slog.String("method", "List"),
+		)
 		return nil, err
 	}
 
