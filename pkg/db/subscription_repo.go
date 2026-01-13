@@ -2,6 +2,7 @@ package db
 
 import (
 	"log/slog"
+	"strings"
 
 	"github.com/EternalQ/effective-mobile-test/pkg/models"
 	"github.com/jmoiron/sqlx"
@@ -75,15 +76,44 @@ func (r *SubscriptionRepo) Delete(id int) error {
 	return nil
 }
 
-var listSubscription = `
-SELECT * 
-FROM subsriptions`
+// var listSubscription = `
+// SELECT *
+// FROM subsriptions
+// WHERE 1=1`
 
-func (r *SubscriptionRepo) List() ([]*models.Subscription, error) {
+func (r *SubscriptionRepo) List(filter *models.Subscription) ([]*models.Subscription, error) {
 	var subscriptions []*models.Subscription
-	err := r.db.Select(&subscriptions, listSubscription)
+	query := "SELECT * FROM subsriptions"
+
+	if filter != nil {
+		conditions := []string{}
+
+		if filter.UserId != "" {
+			conditions = append(conditions, "user_id = :user_id")
+		}
+		if filter.ServiceName != "" {
+			conditions = append(conditions, "service_name = :service_name")
+		}
+		if !filter.StartDate.IsZero() {
+			conditions = append(conditions, "start_date >= :start_date")
+		}
+		if filter.EndDate != nil && !filter.EndDate.IsZero() {
+			conditions = append(conditions, "end_date <= :end_date")
+		}
+
+		if len(conditions) > 0 {
+			query += " WHERE " + strings.Join(conditions, " AND ")
+		}
+	}
+
+	query, args, err := sqlx.Named(query, filter)
 	if err != nil {
 		return nil, err
 	}
+	err = r.db.Select(&subscriptions, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
 	return subscriptions, nil
 }
