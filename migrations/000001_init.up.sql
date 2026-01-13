@@ -1,4 +1,4 @@
-CREATE TABLE subsriptions (
+CREATE TABLE subscriptions (
     id SERIAL PRIMARY KEY,
     service_name VARCHAR NOT NULL,
     price INT NOT NULL CHECK (price > 0),
@@ -7,4 +7,4 @@ CREATE TABLE subsriptions (
     end_date TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS subsriptions_calc_idx ON subsriptions (user_id, service_name);
+CREATE INDEX IF NOT EXISTS subscriptions_calc_idx ON subscriptions (user_id, service_name);

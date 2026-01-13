@@ -26,7 +26,7 @@ func NewSubscriptionRepo(db *sqlx.DB, log *slog.Logger) *SubscriptionRepo {
 }
 
 var createSubscription = `
-INSERT INTO subsriptions (service_name, price, user_id, start_date, end_date)
+INSERT INTO subscriptions (service_name, price, user_id, start_date, end_date)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;`
 
@@ -45,7 +45,7 @@ func (r *SubscriptionRepo) Create(s *models.Subscription) error {
 
 var readSubscription = `
 SELECT * 
-FROM subsriptions 
+FROM subscriptions 
 WHERE id = $1`
 
 func (r *SubscriptionRepo) Read(id int) (*models.Subscription, error) {
@@ -64,7 +64,7 @@ func (r *SubscriptionRepo) Read(id int) (*models.Subscription, error) {
 }
 
 // var updateSubsription = `
-// UPDATE subsriptions
+// UPDATE subscriptions
 // SET service_name = :service_name, price = :price, user_id = :user_id, start_date = :start_date, end_date = :end_date
 // WHERE id = :id`
 
@@ -91,7 +91,7 @@ func (r *SubscriptionRepo) Update(subscription *models.Subscription) error {
 	// if len(fields) == 0 {
 	// 	return err
 	// }
-	query := fmt.Sprintf("UPDATE subsriptions SET %s WHERE id = :id", strings.Join(fields, ", "))
+	query := fmt.Sprintf("UPDATE subscriptions SET %s WHERE id = :id", strings.Join(fields, ", "))
 	r.log.Debug("Update query", slog.String("string", query))
 
 	res, err := r.db.NamedExec(query, subscription)
@@ -115,7 +115,7 @@ func (r *SubscriptionRepo) Update(subscription *models.Subscription) error {
 }
 
 var deleteSubscription = `
-DELETE FROM subsriptions 
+DELETE FROM subscriptions 
 WHERE id = $1`
 
 func (r *SubscriptionRepo) Delete(id int) error {
@@ -141,12 +141,12 @@ func (r *SubscriptionRepo) Delete(id int) error {
 
 // var listSubscription = `
 // SELECT *
-// FROM subsriptions
+// FROM subscriptions
 // WHERE 1=1`
 
 func (r *SubscriptionRepo) List(filter *models.Subscription) ([]*models.Subscription, error) {
 	var subscriptions []*models.Subscription
-	query := "SELECT * FROM subsriptions"
+	query := "SELECT * FROM subscriptions"
 
 	if filter != nil {
 		conditions := []string{}
