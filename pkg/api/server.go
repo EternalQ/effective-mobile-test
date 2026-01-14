@@ -42,6 +42,15 @@ func (s *Server) handleError(w http.ResponseWriter, r *http.Request, err string,
 	http.Error(w, err, code)
 }
 
+// @Summary Create a new subscription
+// @Description Creates a new subscription
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param subscription body models.Subscription true "Subscription details"
+// @Success 201 {int} int "ID of the created subscription"
+// @Failure 400 {string} string "Invalid input"
+// @Router /subscriptions [post]
 func (s *Server) createSubsription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling POST request to /api/subscriptions")
 
@@ -72,6 +81,13 @@ func (s *Server) createSubsription(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]int{"id": sub.Id})
 }
 
+// @Summary List all subscriptions
+// @Description Lists all subscriptions
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.Subscription "List of subscriptions"
+// @Router /subscriptions [get]
 func (s *Server) listSubsription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling GET request to /api/subscriptions")
 
@@ -90,6 +106,15 @@ func (s *Server) listSubsription(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(subs)
 }
 
+// @Summary Read a subscription by ID
+// @Description Reads a subscription by ID
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param id path int true "Subscription ID"
+// @Success 200 {object} models.Subscription "Subscription details"
+// @Failure 404 {string} string "Subscription not found"
+// @Router /subscriptions/{id} [get]
 func (s *Server) readSubsription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling GET request to /api/subscriptions/{id}")
 
@@ -118,6 +143,16 @@ func (s *Server) readSubsription(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(sub)
 }
 
+// @Summary Update a subscription by ID
+// @Description Updates a subscription by ID. Needs at least 1 field to update. Send `"end_date": "0"` to set null.
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param id path int true "Subscription ID"
+// @Param subscription body models.Subscription true "Accepted fields of Subscription: `service_name`, `price`, `user_id`, `start_date`, `end_date`"
+// @Success 200 {object} models.Subscription "Updated subscription details"
+// @Failure 400 {string} string "Invalid input"
+// @Router /subscriptions/{id} [patch]
 func (s *Server) updateSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling PATCH request to /api/subscriptions/{id}")
 
@@ -168,6 +203,15 @@ func (s *Server) updateSubscription(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// @Summary Delete a subscription by ID
+// @Description Deletes a subscription by ID
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param id path int true "Subscription ID"
+// @Success 204 {string} string "Subscription deleted"
+// @Failure 404 {string} string "Subscription not found"
+// @Router /subscriptions/{id} [delete]
 func (s *Server) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling DELETE request to /api/subscriptions/{id}")
 
@@ -190,9 +234,18 @@ func (s *Server) deleteSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.log.Info("Subscription deleted", slog.Int("id", id))
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Summary Calculate subscription price
+// @Description Calculates the subscription price based on a filter. Looks for all subscriptions with given `user_id` and `service_name` between `start_date` and `end_date`. Fields may be omitted but needs at least 1.
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param filter body models.Subscription true "Filter for subscription calculation"
+// @Success 200 {int} int "Calculated price"
+// @Failure 400 {string} string "Invalid input"
+// @Router /subscriptions/calc [post]
 func (s *Server) calculateSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling POST request to /api/subscriptions/calc")
 

@@ -1,0 +1,177 @@
+basePath: /api
+definitions:
+  models.Subscription:
+    properties:
+      end_date:
+        description: omitempty?
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample server for the Effective Mobile Test.
+  title: Effective Mobile Test API
+  version: "1.0"
+paths:
+  /subscriptions:
+    get:
+      consumes:
+      - application/json
+      description: Lists all subscriptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of subscriptions
+          schema:
+            items:
+              $ref: '#/definitions/models.Subscription'
+            type: array
+      summary: List all subscriptions
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Creates a new subscription
+      parameters:
+      - description: Subscription details
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/models.Subscription'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ID of the created subscription
+          schema:
+            type: int
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+      summary: Create a new subscription
+      tags:
+      - subscriptions
+  /subscriptions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a subscription by ID
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Subscription deleted
+          schema:
+            type: string
+        "404":
+          description: Subscription not found
+          schema:
+            type: string
+      summary: Delete a subscription by ID
+      tags:
+      - subscriptions
+    get:
+      consumes:
+      - application/json
+      description: Reads a subscription by ID
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription details
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "404":
+          description: Subscription not found
+          schema:
+            type: string
+      summary: Read a subscription by ID
+      tags:
+      - subscriptions
+    patch:
+      consumes:
+      - application/json
+      description: 'Updates a subscription by ID. Needs at least 1 field to update.
+        Send `"end_date": "0"` to set null.'
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Accepted fields of Subscription: `service_name`, `price`, `user_id`,
+          `start_date`, `end_date`'
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/models.Subscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated subscription details
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+      summary: Update a subscription by ID
+      tags:
+      - subscriptions
+  /subscriptions/calc:
+    post:
+      consumes:
+      - application/json
+      description: Calculates the subscription price based on a filter. Looks for
+        all subscriptions with given `user_id` and `service_name` between `start_date`
+        and `end_date`. Fields may be omitted but needs at least 1.
+      parameters:
+      - description: Filter for subscription calculation
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/models.Subscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Calculated price
+          schema:
+            type: int
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+      summary: Calculate subscription price
+      tags:
+      - subscriptions
+swagger: "2.0"

@@ -6,12 +6,16 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/EternalQ/effective-mobile-test/docs"
+
 	"github.com/EternalQ/effective-mobile-test/pkg/api"
 	"github.com/EternalQ/effective-mobile-test/pkg/service"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 	"github.com/spf13/viper"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 var (
@@ -41,6 +45,11 @@ func readEnv() {
 	logLvl = viper.GetInt("LOG_LVL")
 }
 
+// @title Effective Mobile Test API
+// @version 1.0
+// @description This is a sample server for the Effective Mobile Test.
+// @host localhost:8080
+// @BasePath /api
 func main() {
 	readEnv()
 
@@ -63,7 +72,14 @@ func main() {
 	log.Info("Subscription service created")
 
 	router := mux.NewRouter()
+
+	c := cors.AllowAll()
+	router.Use(c.Handler)
+
 	api.StartServer(log, subServ, router)
+	
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	
 	log.Info("Server started, listening on 8080")
 	http.ListenAndServe(":8080", router)
 }
