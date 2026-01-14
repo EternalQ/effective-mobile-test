@@ -8,7 +8,6 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.11.1
 	github.com/spf13/viper v1.21.0
-	github.com/swaggo/http-swagger/example/gorilla v0.0.0-20250902111949-1340604bd9f5
 	github.com/swaggo/http-swagger/v2 v2.0.2
 	github.com/swaggo/swag v1.8.1
 )
