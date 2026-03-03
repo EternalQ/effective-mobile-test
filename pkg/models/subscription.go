@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-var subscrTimeLayout = "01-2006"
+var SubscrTimeLayout = "01-2006"
 
 type Subscription struct {
 	Id                int        `json:"id" db:"id"`
@@ -16,24 +16,24 @@ type Subscription struct {
 }
 
 func (s *Subscription) Format() {
-	s.StartDateFormated = s.StartDate.Format(subscrTimeLayout)
+	s.StartDateFormated = s.StartDate.Format(SubscrTimeLayout)
 
 	if s.EndDate != nil {
-		s.EndDateFormated = s.EndDate.Format(subscrTimeLayout)
+		s.EndDateFormated = s.EndDate.Format(SubscrTimeLayout)
 	}
 }
 
 func (s *Subscription) Parse() error {
 	var err error
 	if s.StartDateFormated != "" {
-		s.StartDate, err = time.Parse(subscrTimeLayout, s.StartDateFormated)
+		s.StartDate, err = time.Parse(SubscrTimeLayout, s.StartDateFormated)
 		if err != nil {
 			return err
 		}
 	}
 
 	if s.EndDateFormated != "" && s.EndDateFormated != "0" {
-		end, err := time.Parse(subscrTimeLayout, s.EndDateFormated)
+		end, err := time.Parse(SubscrTimeLayout, s.EndDateFormated)
 		if err != nil {
 			return err
 		}

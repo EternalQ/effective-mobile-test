@@ -77,9 +77,11 @@ func main() {
 	router.Use(c.Handler)
 
 	api.StartServer(log, subServ, router)
-	
+
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
-	
+
 	log.Info("Server started, listening on 8080")
-	http.ListenAndServe(":8080", router)
+	if err := http.ListenAndServe(":8080", router); err != nil {
+		panic(err)
+	}
 }
