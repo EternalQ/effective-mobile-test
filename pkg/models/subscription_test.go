@@ -51,6 +51,22 @@ func TestSubscription_Parse(t *testing.T) {
 			wantEnd:   false,
 			wantErr:   false,
 		},
+		{
+			name:      "invalid start",
+			start:     "wrong",
+			end:       "03-2026",
+			wantStart: true,
+			wantEnd:   false,
+			wantErr:   true,
+		},
+		{
+			name:      "invalid end",
+			start:     "03-2026",
+			end:       "wrong",
+			wantStart: true,
+			wantEnd:   false,
+			wantErr:   true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,15 +83,32 @@ func TestSubscription_Parse(t *testing.T) {
 
 			if tt.wantStart {
 				want, err := time.Parse(models.SubscrTimeLayout, s.StartDateFormated)
-				assert.Nil(t, err)
+				if !tt.wantErr {
+					assert.Nil(t, err)
+				}
 				assert.Equal(t, want, s.StartDate)
 			}
 
 			if tt.wantEnd {
 				want, err := time.Parse(models.SubscrTimeLayout, s.EndDateFormated)
-				assert.Nil(t, err)
+				if !tt.wantErr {
+					assert.Nil(t, err)
+				}
 				assert.Equal(t, want, *s.EndDate)
 			}
 		})
+	}
+}
+
+func BenchmarkSubscription_Format(b *testing.B) {
+	start := time.Date(2026, 3, 1, 0, 0, 0, 0, time.FixedZone("GMT", 3))
+	end := time.Date(2026, 6, 1, 0, 0, 0, 0, time.FixedZone("GMT", 3))
+	s := &models.Subscription{
+		StartDate: start,
+		EndDate:   &end,
+	}
+
+	for b.Loop() {
+		s.Format()
 	}
 }
