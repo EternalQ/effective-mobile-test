@@ -79,7 +79,7 @@ func (s *Server) createSubsription(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(map[string]int{"id": sub.Id}); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		s.log.Error("failed to encode response", slog.String("err", err.Error()))
 	}
 }
 
@@ -106,7 +106,7 @@ func (s *Server) listSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Subscriptions listed", slog.Int("count", len(subs)))
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(subs); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		s.log.Error("failed to encode response", slog.String("err", err.Error()))
 	}
 }
 
@@ -145,7 +145,7 @@ func (s *Server) readSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Subscription readed", slog.Int("id", sub.Id))
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(sub); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		s.log.Error("failed to encode response", slog.String("err", err.Error()))
 	}
 }
 
@@ -279,6 +279,6 @@ func (s *Server) calculateSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Price calculated", slog.Int("price", price))
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(map[string]int{"price": price}); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		s.log.Error("failed to encode response", slog.String("err", err.Error()))
 	}
 }
