@@ -3,20 +3,26 @@ package service
 import (
 	"log/slog"
 
-	"github.com/EternalQ/effective-mobile-test/pkg/db"
 	"github.com/EternalQ/effective-mobile-test/pkg/models"
-	"github.com/jmoiron/sqlx"
 )
+
+type Repository interface {
+	Create(*models.Subscription) error
+	Read(int) (*models.Subscription, error)
+	Update(*models.Subscription) error
+	Delete(int) error
+	List(*models.Subscription) ([]*models.Subscription, error)
+}
 
 type SubscriptionService struct {
 	log           *slog.Logger
-	subscriptions *db.SubscriptionRepo
+	subscriptions Repository
 }
 
-func NewSubscriptionService(pgs *sqlx.DB, log *slog.Logger) *SubscriptionService {
+func NewSubscriptionService(subRepo Repository, log *slog.Logger) *SubscriptionService {
 	return &SubscriptionService{
 		log.With(slog.String("where", "service/SubscriptionService")),
-		db.NewSubscriptionRepo(pgs, log),
+		subRepo,
 	}
 }
 

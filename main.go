@@ -9,6 +9,7 @@ import (
 	_ "github.com/EternalQ/effective-mobile-test/docs"
 
 	"github.com/EternalQ/effective-mobile-test/pkg/api"
+	"github.com/EternalQ/effective-mobile-test/pkg/db"
 	"github.com/EternalQ/effective-mobile-test/pkg/service"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
@@ -68,7 +69,8 @@ func main() {
 	}
 	log.Info("PostgreSQL connected")
 
-	subServ := service.NewSubscriptionService(pgs, log)
+	subRepo := db.NewSubscriptionRepo(pgs, log)
+	subServ := service.NewSubscriptionService(subRepo, log)
 	log.Info("Subscription service created")
 
 	router := mux.NewRouter()
