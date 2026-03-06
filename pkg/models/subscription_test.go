@@ -100,6 +100,45 @@ func TestSubscription_Parse(t *testing.T) {
 	}
 }
 
+func TestSubscription_Format(t *testing.T) {
+	tests := []struct {
+		name string
+
+		start time.Time
+		end   time.Time
+
+		wantStart string
+		wantEnd   string
+	}{
+		{
+			name:      "only start",
+			start:     time.Date(2026, 3, 1, 0, 0, 0, 0, time.FixedZone("GMT", 3)),
+			wantStart: "03-2026",
+			wantEnd:   "",
+		},
+		{
+			name:      "full",
+			start:     time.Date(2026, 3, 1, 0, 0, 0, 0, time.FixedZone("GMT", 3)),
+			end:       time.Date(2026, 6, 1, 0, 0, 0, 0, time.FixedZone("GMT", 3)),
+			wantStart: "03-2026",
+			wantEnd:   "06-2026",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &models.Subscription{
+				StartDate: tt.start,
+			}
+			if !tt.end.IsZero() {
+				s.EndDate = &tt.end
+			}
+			s.Format()
+			assert.Equal(t, tt.wantStart, s.StartDateFormatted)
+			assert.Equal(t, tt.wantEnd, s.EndDateFormatted)
+		})
+	}
+}
+
 func BenchmarkSubscription_Format(b *testing.B) {
 	start := time.Date(2026, 3, 1, 0, 0, 0, 0, time.FixedZone("GMT", 3))
 	end := time.Date(2026, 6, 1, 0, 0, 0, 0, time.FixedZone("GMT", 3))
