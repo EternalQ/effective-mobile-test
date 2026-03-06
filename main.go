@@ -66,7 +66,7 @@ func main() {
 		log.Error("Can't connect to PostgreSQL, check .env")
 		os.Exit(0)
 	}
-	log.Info("PotgreSQL connected")
+	log.Info("PostgreSQL connected")
 
 	subServ := service.NewSubscriptionService(pgs, log)
 	log.Info("Subscription service created")

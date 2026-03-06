@@ -26,8 +26,8 @@ func StartServer(log *slog.Logger, subsServ *service.SubscriptionService, r *mux
 	api := r.PathPrefix("/api").Subrouter()
 
 	api.HandleFunc("/subscriptions", s.createSubsription).Methods("POST")
-	api.HandleFunc("/subscriptions", s.listSubsription).Methods("get")
-	api.HandleFunc("/subscriptions/{id}", s.readSubsription).Methods("Get")
+	api.HandleFunc("/subscriptions", s.listSubscription).Methods("get")
+	api.HandleFunc("/subscriptions/{id}", s.readSubscription).Methods("Get")
 	api.HandleFunc("/subscriptions/{id}", s.updateSubscription).Methods("PATCH")
 	api.HandleFunc("/subscriptions/{id}", s.deleteSubscription).Methods("DELETE")
 	api.HandleFunc("/subscriptions/calc", s.calculateSubscription).Methods("POST")
@@ -90,7 +90,7 @@ func (s *Server) createSubsription(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {array} models.Subscription "List of subscriptions"
 // @Router /subscriptions [get]
-func (s *Server) listSubsription(w http.ResponseWriter, r *http.Request) {
+func (s *Server) listSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling GET request to /api/subscriptions")
 
 	subs, err := s.subsServ.ListAll()
@@ -119,7 +119,7 @@ func (s *Server) listSubsription(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} models.Subscription "Subscription details"
 // @Failure 404 {string} string "Subscription not found"
 // @Router /subscriptions/{id} [get]
-func (s *Server) readSubsription(w http.ResponseWriter, r *http.Request) {
+func (s *Server) readSubscription(w http.ResponseWriter, r *http.Request) {
 	s.log.Info("Handling GET request to /api/subscriptions/{id}")
 
 	vars := mux.Vars(r)
@@ -180,8 +180,8 @@ func (s *Server) updateSubscription(w http.ResponseWriter, r *http.Request) {
 	if sub.UserId == "" &&
 		sub.ServiceName == "" &&
 		sub.Price == 0 &&
-		sub.StartDateFormated == "" &&
-		sub.EndDateFormated == "" {
+		sub.StartDateFormatted == "" &&
+		sub.EndDateFormatted == "" {
 		s.handleError(w, r, "Empty fields", http.StatusBadRequest)
 		return
 	}

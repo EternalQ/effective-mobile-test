@@ -82,7 +82,7 @@ func (r *SubscriptionRepo) Update(subscription *models.Subscription) error {
 	if !subscription.StartDate.IsZero() {
 		fields = append(fields, "start_date = :start_date")
 	}
-	if subscription.EndDateFormated == "0" {
+	if subscription.EndDateFormatted == "0" {
 		fields = append(fields, "end_date = NULL")
 	} else if subscription.EndDate != nil && !subscription.EndDate.IsZero() {
 		fields = append(fields, "end_date = :end_date")

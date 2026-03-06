@@ -71,8 +71,8 @@ func TestSubscription_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &models.Subscription{
-				StartDateFormated: tt.start,
-				EndDateFormated:   tt.end,
+				StartDateFormatted: tt.start,
+				EndDateFormatted:   tt.end,
 			}
 			gotErr := s.Parse()
 			if tt.wantErr {
@@ -82,7 +82,7 @@ func TestSubscription_Parse(t *testing.T) {
 			}
 
 			if tt.wantStart {
-				want, err := time.Parse(models.SubscrTimeLayout, s.StartDateFormated)
+				want, err := time.Parse(models.SubscrTimeLayout, s.StartDateFormatted)
 				if !tt.wantErr {
 					assert.Nil(t, err)
 				}
@@ -90,7 +90,7 @@ func TestSubscription_Parse(t *testing.T) {
 			}
 
 			if tt.wantEnd {
-				want, err := time.Parse(models.SubscrTimeLayout, s.EndDateFormated)
+				want, err := time.Parse(models.SubscrTimeLayout, s.EndDateFormatted)
 				if !tt.wantErr {
 					assert.Nil(t, err)
 				}
